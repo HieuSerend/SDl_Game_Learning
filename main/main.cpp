@@ -16,6 +16,8 @@ class LTexture{
 
         void free();
 
+        void setColor(Uint8 r, Uint8 g, Uint8 b);
+
         void render(int x, int y, SDL_Rect* clip = NULL);
 
         int getWidth();
@@ -34,9 +36,7 @@ void close();
 SDL_Window* Window = NULL;
 SDL_Renderer* Renderer = NULL;
 
-SDL_Rect gSpriteSheet[4];
-
-LTexture gSheet;
+LTexture gColor;
 
 LTexture::LTexture(){
 
@@ -61,6 +61,12 @@ void LTexture::free(){
         mHeight = 0;
 
     }
+
+}
+
+void LTexture::setColor(Uint8 r, Uint8 g, Uint8 b){
+
+    SDL_SetTextureColorMod(mTexture, r, g, b);
 
 }
 
@@ -161,31 +167,10 @@ bool media(){
 
     bool success = true;
 
-    if (!gSheet.LoadFromFile("main/dots.png")){
+    if (!gColor.LoadFromFile("main/colors.png")){
         std::cout << "Could not load sheet image! SDL error: " ;
         SDL_GetError();
         success = false;
-    }
-    else{
-        gSpriteSheet[0].x = 0;
-        gSpriteSheet[0].y = 0;
-        gSpriteSheet[0].w = 100;
-        gSpriteSheet[0].h = 100;
-
-        gSpriteSheet[1].x = 100;
-        gSpriteSheet[1].y = 0;
-        gSpriteSheet[1].w = 100;
-        gSpriteSheet[1].h = 100;
-
-        gSpriteSheet[2].x = 0;
-        gSpriteSheet[2].y = 100;
-        gSpriteSheet[2].w = 100;
-        gSpriteSheet[2].h = 100;
-
-        gSpriteSheet[3].x = 100;
-        gSpriteSheet[3].y = 100;
-        gSpriteSheet[3].w = 100;
-        gSpriteSheet[3].h = 100;
     }
 
     return success;
@@ -193,7 +178,7 @@ bool media(){
 
 void close(){
 
-    gSheet.free();
+    gColor.free();
 
     SDL_DestroyRenderer(Renderer);
     Renderer = NULL;
@@ -221,10 +206,38 @@ int main(int argc, char* args[]){
 
             SDL_Event e;
 
+            Uint8 r = 255;
+            Uint8 g = 255;
+            Uint8 b = 255;
+
             while (!quit){
                 while (SDL_PollEvent(&e) != 0){
                     if (e.type == SDL_QUIT){
                         quit = true;
+                    }
+                    else if (e.type == SDL_KEYDOWN){
+                        switch (e.key.keysym.sym){
+
+                        case SDLK_q:
+                            r += 32;
+                            break;
+                        case SDLK_w:
+                            r += 32;
+                            break;
+                        case SDLK_e:
+                            r += 32;
+                            break;
+                        case SDLK_a:
+                            r -= 32;
+                            break;
+                        case SDLK_s:
+                            r -= 32;
+                            break;
+                        case SDLK_d:
+                            r -= 32;
+                            break;
+
+                        }
                     }
                 }
 
@@ -232,13 +245,9 @@ int main(int argc, char* args[]){
 				SDL_SetRenderDrawColor( Renderer, 0xFF, 0xFF, 0xFF, 0xFF );
 				SDL_RenderClear( Renderer );
 
-				gSheet.render(0, 0, &gSpriteSheet[0]);
+				gColor.setColor(r, g, b);
 
-				gSheet.render(SCREEN_WIDTH - gSpriteSheet[1].w, 0, &gSpriteSheet[1]);
-
-				gSheet.render(0, SCREEN_HEIGHT - gSpriteSheet[2].h, &gSpriteSheet[2]);
-
-				gSheet.render(SCREEN_WIDTH - gSpriteSheet[3].w, SCREEN_HEIGHT - gSpriteSheet[3].h, &gSpriteSheet[3]);
+				gColor.render(0,0);
 
 				SDL_RenderPresent( Renderer );
 
