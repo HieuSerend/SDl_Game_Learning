@@ -1,8 +1,0 @@
-#Ignore folders
-bin/
-obj/
-#ignore files
-*.dll
-*.depend
-*.cbp
-*.layout
