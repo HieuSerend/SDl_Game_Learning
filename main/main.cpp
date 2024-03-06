@@ -185,14 +185,14 @@ bool media(){
 
     bool success = true;
 
-    if (!gModulateTexture.LoadFromFile("main/fadeout.png")){
+    if (!gModulateTexture.LoadFromFile("main/resources/fadeout.png")){
         std::cout << "Could not load front texture! ";
         success = false;
     }
     else{
         gModulateTexture.setBlendMode(SDL_BLENDMODE_BLEND);
     }
-    if (!gBackgroundTexture.LoadFromFile("main/fadein.png")){
+    if (!gBackgroundTexture.LoadFromFile("main/resources/fadein.png")){
         std::cout << "Could not load background texture! ";
         success = false;
     }
