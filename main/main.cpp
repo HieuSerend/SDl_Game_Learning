@@ -18,6 +18,10 @@ class LTexture{
 
         void setColor(Uint8 r, Uint8 g, Uint8 b);
 
+        void setAlpha(Uint8 a);
+
+        void setBlendMode(SDL_BlendMode blend);
+
         void render(int x, int y, SDL_Rect* clip = NULL);
 
         int getWidth();
@@ -37,6 +41,8 @@ SDL_Window* Window = NULL;
 SDL_Renderer* Renderer = NULL;
 
 LTexture gColor;
+LTexture gModulateTexture;
+LTexture gBackgroundTexture;
 
 LTexture::LTexture(){
 
@@ -67,6 +73,18 @@ void LTexture::free(){
 void LTexture::setColor(Uint8 r, Uint8 g, Uint8 b){
 
     SDL_SetTextureColorMod(mTexture, r, g, b);
+
+}
+
+void LTexture::setAlpha(Uint8 a){
+
+    SDL_SetTextureAlphaMod(mTexture, a);
+
+}
+
+void LTexture::setBlendMode(SDL_BlendMode blend){
+
+    SDL_SetTextureBlendMode(mTexture, blend);
 
 }
 
@@ -167,9 +185,15 @@ bool media(){
 
     bool success = true;
 
-    if (!gColor.LoadFromFile("main/colors.png")){
-        std::cout << "Could not load sheet image! SDL error: " ;
-        SDL_GetError();
+    if (!gModulateTexture.LoadFromFile("main/fadeout.png")){
+        std::cout << "Could not load front texture! ";
+        success = false;
+    }
+    else{
+        gModulateTexture.setBlendMode(SDL_BLENDMODE_BLEND);
+    }
+    if (!gBackgroundTexture.LoadFromFile("main/fadein.png")){
+        std::cout << "Could not load background texture! ";
         success = false;
     }
 
@@ -178,7 +202,8 @@ bool media(){
 
 void close(){
 
-    gColor.free();
+    gModulateTexture.free();
+    gBackgroundTexture.free();
 
     SDL_DestroyRenderer(Renderer);
     Renderer = NULL;
@@ -206,9 +231,7 @@ int main(int argc, char* args[]){
 
             SDL_Event e;
 
-            Uint8 r = 255;
-            Uint8 g = 255;
-            Uint8 b = 255;
+            Uint8 a = 50;
 
             while (!quit){
                 while (SDL_PollEvent(&e) != 0){
@@ -216,27 +239,21 @@ int main(int argc, char* args[]){
                         quit = true;
                     }
                     else if (e.type == SDL_KEYDOWN){
-                        switch (e.key.keysym.sym){
-
-                        case SDLK_q:
-                            r += 32;
-                            break;
-                        case SDLK_w:
-                            r += 32;
-                            break;
-                        case SDLK_e:
-                            r += 32;
-                            break;
-                        case SDLK_a:
-                            r -= 32;
-                            break;
-                        case SDLK_s:
-                            r -= 32;
-                            break;
-                        case SDLK_d:
-                            r -= 32;
-                            break;
-
+                        if (e.key.keysym.sym == SDLK_w){
+                            if (a + 32 > 255){
+                                a = 255;
+                            }
+                            else{
+                                a += 32;
+                            }
+                        }
+                        else if (e.key.keysym.sym == SDLK_s){
+                            if (a - 32 < 0){
+                                a = 0;
+                            }
+                            else{
+                                a -= 32;
+                            }
                         }
                     }
                 }
@@ -245,9 +262,11 @@ int main(int argc, char* args[]){
 				SDL_SetRenderDrawColor( Renderer, 0xFF, 0xFF, 0xFF, 0xFF );
 				SDL_RenderClear( Renderer );
 
-				gColor.setColor(r, g, b);
+				gBackgroundTexture.render(0,0);
 
-				gColor.render(0,0);
+                gModulateTexture.setAlpha(a);
+                gModulateTexture.render(0,0);
+
 
 				SDL_RenderPresent( Renderer );
 
