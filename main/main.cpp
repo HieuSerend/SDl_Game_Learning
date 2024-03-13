@@ -1,6 +1,7 @@
 
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
 #include <bits/stdc++.h>
 
 const int SCREEN_WIDTH = 640;
@@ -15,6 +16,8 @@ class LTexture{
         bool LoadFromFile(std::string path);
 
         void free();
+
+        bool TextLoading(std::string text, SDL_Color color);
 
         void render(int x, int y, SDL_Rect* clip = NULL, double angle = 0.0, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE );
 
@@ -34,7 +37,9 @@ void close();
 SDL_Window* Window = NULL;
 SDL_Renderer* Renderer = NULL;
 
-LTexture gFlipArrow;
+TTF_Font* gFont;
+
+LTexture gFontTexture;
 
 LTexture::LTexture(){
 
@@ -62,6 +67,32 @@ void LTexture::free(){
 
 }
 
+bool LTexture::TextLoading(std::string text, SDL_Color color){
+
+    LTexture::free();
+
+    SDL_Surface* FontSurface = TTF_RenderText_Solid(gFont, text.c_str(), color);
+
+    if (FontSurface == NULL){
+        std::cout << "Could not render font surface! TTF error" << std::endl;
+        TTF_GetError();
+    }
+    else{
+        mTexture = SDL_CreateTextureFromSurface(Renderer, FontSurface);
+        if (mTexture == NULL){
+            std::cout << "Could not create texture from surface! SDL error: " << std::endl;
+            TTF_GetError();
+        }
+        else{
+            mWidth = FontSurface->w;
+            mHeight = FontSurface->h;
+        }
+    }
+
+    SDL_FreeSurface(FontSurface);
+    return mTexture != NULL;
+
+}
 
 void LTexture::render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip){
 
@@ -119,6 +150,12 @@ bool init(){
                     IMG_GetError();
                     success = false;
                 }
+
+                if (TTF_Init() == -1){
+                    std::cout << "Could not initialize true type font! TTF error: " << std::endl;
+                    TTF_GetError();
+                    success = false;
+                }
             }
 
         }
@@ -160,9 +197,20 @@ bool media(){
 
     bool success = true;
 
-    if (!gFlipArrow.LoadFromFile("main/resources/arrow.png")){
-        std::cout << "Could not load front texture! ";
+    gFont = TTF_OpenFont("main/resources/lazy.ttf", 28);
+
+    if (gFont == NULL){
+        std::cout << "Could not open font! ttf error: " << std::endl;
+        TTF_GetError();
         success = false;
+    }
+    else{
+        SDL_Color color = {125,125,125};
+        if (!(gFontTexture.TextLoading("test a short text", color))){
+            std::cout << "Could not load text! TTF error: " << std::endl;
+            TTF_GetError();
+            success = false;
+        }
     }
 
     return success;
@@ -170,13 +218,17 @@ bool media(){
 
 void close(){
 
-    gFlipArrow.free();
+    gFontTexture.free();
+
+    TTF_CloseFont(gFont);
+    gFont = NULL;
 
     SDL_DestroyRenderer(Renderer);
     Renderer = NULL;
     SDL_DestroyWindow(Window);
     Window = NULL;
 
+    TTF_Quit();
     IMG_Quit();
     SDL_Quit();
 
@@ -198,33 +250,10 @@ int main(int argc, char* args[]){
 
             SDL_Event e;
 
-            double degrees = 0;
-
-            SDL_RendererFlip flipType = SDL_FLIP_NONE;
-
             while (!quit){
                 while (SDL_PollEvent(&e) != 0){
                     if (e.type == SDL_QUIT){
                         quit = true;
-                    }
-                    else if (e.type == SDL_KEYDOWN) {
-                        switch(e.key.keysym.sym){
-                            case SDLK_a:
-                                degrees -= 60;
-                                break;
-                            case SDLK_d:
-                                degrees += 60;
-                                break;
-                            case SDLK_q:
-                                flipType = SDL_FLIP_HORIZONTAL;
-                                break;
-                            case SDLK_w:
-                                flipType = SDL_FLIP_NONE;
-                                break;
-                            case SDLK_e:
-                                flipType = SDL_FLIP_VERTICAL;
-                                break;
-                        }
                     }
 
                 }
@@ -233,7 +262,7 @@ int main(int argc, char* args[]){
 				SDL_SetRenderDrawColor( Renderer, 0xFF, 0xFF, 0xFF, 0xFF );
 				SDL_RenderClear( Renderer );
 
-				gFlipArrow.render((SCREEN_WIDTH - gFlipArrow.getWidth())/2, (SCREEN_HEIGHT - gFlipArrow.getHeight())/2, NULL, degrees, NULL, flipType);
+				gFontTexture.render((SCREEN_WIDTH - gFontTexture.getWidth())/2, (SCREEN_HEIGHT - gFontTexture.getHeight())/2);
 
 				SDL_RenderPresent( Renderer );
 

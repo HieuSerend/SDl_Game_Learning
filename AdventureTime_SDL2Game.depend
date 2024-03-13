@@ -1,7 +1,8 @@
 # depslib dependency file v1.0
-1709305666 source:d:\hieeus\adventuretime_sdl2game\main\main.cpp
+1710322180 source:d:\hieeus\adventuretime_sdl2game\main\main.cpp
 	<SDL.h>
 	<SDL_image.h>
+	<SDL_ttf.h>
 	<bits/stdc++.h>
 
 1705496934 d:\hieeus\sdl2-2.28.5\i686-w64-mingw32\include\sdl2\sdl.h
@@ -404,4 +405,9 @@
 	"close_code.h"
 
 1710316436 source:d:\hieeus\adventuretime_sdl2game\main\simpletest.cpp
+
+1705848815 d:\hieeus\lazzyfoo\sdl2_ttf-devel-2.22.0-mingw\sdl2_ttf-2.22.0\i686-w64-mingw32\include\sdl2\sdl_ttf.h
+	"SDL.h"
+	"begin_code.h"
+	"close_code.h"
 

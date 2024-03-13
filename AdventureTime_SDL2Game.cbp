@@ -32,14 +32,17 @@
 			<Add option="-Wall" />
 			<Add directory="D:/Hieeus/SDL2-2.28.5/i686-w64-mingw32/include/SDL2" />
 			<Add directory="D:/Hieeus/SDL2_image-2.8.2/i686-w64-mingw32/include/SDL2" />
+			<Add directory="D:/Hieeus/LazzyFoo/SDL2_ttf-devel-2.22.0-mingw/SDL2_ttf-2.22.0/i686-w64-mingw32/include/SDL2" />
 		</Compiler>
 		<Linker>
-			<Add option="-lmingw32 -lSDL2main -lSDL2 -lSDL2_image" />
+			<Add option="-lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf" />
 			<Add directory="D:/Hieeus/SDL2-2.28.5/i686-w64-mingw32/lib" />
 			<Add directory="D:/Hieeus/SDL2_image-2.8.2/i686-w64-mingw32/lib" />
+			<Add directory="D:/Hieeus/LazzyFoo/SDL2_ttf-devel-2.22.0-mingw/SDL2_ttf-2.22.0/i686-w64-mingw32/lib" />
 		</Linker>
 		<Unit filename="main/hello_world.bmp" />
 		<Unit filename="main/main.cpp" />
+		<Unit filename="main/simpleTest.cpp" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>
