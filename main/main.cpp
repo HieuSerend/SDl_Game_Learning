@@ -16,12 +16,6 @@ class LTexture{
 
         void free();
 
-        void setColor(Uint8 r, Uint8 g, Uint8 b);
-
-        void setAlpha(Uint8 a);
-
-        void setBlendMode(SDL_BlendMode blend);
-
         void render(int x, int y, SDL_Rect* clip = NULL);
 
         int getWidth();
@@ -40,9 +34,11 @@ void close();
 SDL_Window* Window = NULL;
 SDL_Renderer* Renderer = NULL;
 
-LTexture gColor;
-LTexture gModulateTexture;
-LTexture gBackgroundTexture;
+const int walking_animation_frame = 6;
+
+SDL_Rect gSpriteSheetClip[walking_animation_frame];
+
+LTexture gSpriteSheet;
 
 LTexture::LTexture(){
 
@@ -70,23 +66,6 @@ void LTexture::free(){
 
 }
 
-void LTexture::setColor(Uint8 r, Uint8 g, Uint8 b){
-
-    SDL_SetTextureColorMod(mTexture, r, g, b);
-
-}
-
-void LTexture::setAlpha(Uint8 a){
-
-    SDL_SetTextureAlphaMod(mTexture, a);
-
-}
-
-void LTexture::setBlendMode(SDL_BlendMode blend){
-
-    SDL_SetTextureBlendMode(mTexture, blend);
-
-}
 
 void LTexture::render(int x, int y, SDL_Rect* clip){
 
@@ -130,7 +109,7 @@ bool init(){
             success = false;
         }
         else{
-            Renderer = SDL_CreateRenderer(Window, -1, SDL_RENDERER_ACCELERATED);
+            Renderer = SDL_CreateRenderer(Window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
             if (Renderer == NULL){
                 std::cout << "Could not create renderer! SDL error: " << std::endl;
                 SDL_GetError();
@@ -185,16 +164,40 @@ bool media(){
 
     bool success = true;
 
-    if (!gModulateTexture.LoadFromFile("main/resources/fadeout.png")){
+    if (!gSpriteSheet.LoadFromFile("main/resources/walkingman2.png")){
         std::cout << "Could not load front texture! ";
         success = false;
     }
     else{
-        gModulateTexture.setBlendMode(SDL_BLENDMODE_BLEND);
-    }
-    if (!gBackgroundTexture.LoadFromFile("main/resources/fadein.png")){
-        std::cout << "Could not load background texture! ";
-        success = false;
+        gSpriteSheetClip[0].x = 0;
+        gSpriteSheetClip[0].y = 0;
+        gSpriteSheetClip[0].w = 137;
+        gSpriteSheetClip[0].h = 135;
+
+        gSpriteSheetClip[1].x = 137;
+        gSpriteSheetClip[1].y = 0;
+        gSpriteSheetClip[1].w = 137;
+        gSpriteSheetClip[1].h = 135;
+
+        gSpriteSheetClip[2].x = 274;
+        gSpriteSheetClip[2].y = 0;
+        gSpriteSheetClip[2].w = 137;
+        gSpriteSheetClip[2].h = 135;
+
+        gSpriteSheetClip[3].x = 411;
+        gSpriteSheetClip[3].y = 0;
+        gSpriteSheetClip[3].w = 137;
+        gSpriteSheetClip[3].h = 135;
+
+        gSpriteSheetClip[4].x = 548;
+        gSpriteSheetClip[4].y = 0;
+        gSpriteSheetClip[4].w = 137;
+        gSpriteSheetClip[4].h = 135;
+
+        gSpriteSheetClip[5].x = 685;
+        gSpriteSheetClip[5].y = 0;
+        gSpriteSheetClip[5].w = 137;
+        gSpriteSheetClip[5].h = 135;
     }
 
     return success;
@@ -202,8 +205,7 @@ bool media(){
 
 void close(){
 
-    gModulateTexture.free();
-    gBackgroundTexture.free();
+    gSpriteSheet.free();
 
     SDL_DestroyRenderer(Renderer);
     Renderer = NULL;
@@ -231,44 +233,31 @@ int main(int argc, char* args[]){
 
             SDL_Event e;
 
-            Uint8 a = 50;
+            int frame = 0;
 
             while (!quit){
                 while (SDL_PollEvent(&e) != 0){
                     if (e.type == SDL_QUIT){
                         quit = true;
                     }
-                    else if (e.type == SDL_KEYDOWN){
-                        if (e.key.keysym.sym == SDLK_w){
-                            if (a + 32 > 255){
-                                a = 255;
-                            }
-                            else{
-                                a += 32;
-                            }
-                        }
-                        else if (e.key.keysym.sym == SDLK_s){
-                            if (a - 32 < 0){
-                                a = 0;
-                            }
-                            else{
-                                a -= 32;
-                            }
-                        }
-                    }
+
                 }
 
                 //Clear screen
 				SDL_SetRenderDrawColor( Renderer, 0xFF, 0xFF, 0xFF, 0xFF );
 				SDL_RenderClear( Renderer );
 
-				gBackgroundTexture.render(0,0);
+				SDL_Rect* CurrentClip = &gSpriteSheetClip[frame/6];
 
-                gModulateTexture.setAlpha(a);
-                gModulateTexture.render(0,0);
-
+				gSpriteSheet.render((SCREEN_WIDTH - CurrentClip->w)/2, (SCREEN_HEIGHT - CurrentClip->h)/2, CurrentClip);
 
 				SDL_RenderPresent( Renderer );
+
+				frame++;
+
+				if (frame/6 > 6){
+                    frame = 0;
+				}
 
             }
         }
