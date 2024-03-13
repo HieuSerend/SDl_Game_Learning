@@ -16,7 +16,7 @@ class LTexture{
 
         void free();
 
-        void render(int x, int y, SDL_Rect* clip = NULL);
+        void render(int x, int y, SDL_Rect* clip = NULL, double angle = 0.0, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE );
 
         int getWidth();
         int getHeight();
@@ -34,11 +34,7 @@ void close();
 SDL_Window* Window = NULL;
 SDL_Renderer* Renderer = NULL;
 
-const int walking_animation_frame = 6;
-
-SDL_Rect gSpriteSheetClip[walking_animation_frame];
-
-LTexture gSpriteSheet;
+LTexture gFlipArrow;
 
 LTexture::LTexture(){
 
@@ -67,7 +63,7 @@ void LTexture::free(){
 }
 
 
-void LTexture::render(int x, int y, SDL_Rect* clip){
+void LTexture::render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip){
 
     SDL_Rect renderQuad = {x, y, mWidth, mHeight};
 
@@ -76,7 +72,7 @@ void LTexture::render(int x, int y, SDL_Rect* clip){
         renderQuad.h = clip->h;
     }
 
-    SDL_RenderCopy(Renderer, mTexture, clip , &renderQuad);
+    SDL_RenderCopyEx(Renderer, mTexture, clip , &renderQuad, angle, center, flip);
 
 }
 
@@ -164,40 +160,9 @@ bool media(){
 
     bool success = true;
 
-    if (!gSpriteSheet.LoadFromFile("main/resources/walkingman2.png")){
+    if (!gFlipArrow.LoadFromFile("main/resources/arrow.png")){
         std::cout << "Could not load front texture! ";
         success = false;
-    }
-    else{
-        gSpriteSheetClip[0].x = 0;
-        gSpriteSheetClip[0].y = 0;
-        gSpriteSheetClip[0].w = 137;
-        gSpriteSheetClip[0].h = 135;
-
-        gSpriteSheetClip[1].x = 137;
-        gSpriteSheetClip[1].y = 0;
-        gSpriteSheetClip[1].w = 137;
-        gSpriteSheetClip[1].h = 135;
-
-        gSpriteSheetClip[2].x = 274;
-        gSpriteSheetClip[2].y = 0;
-        gSpriteSheetClip[2].w = 137;
-        gSpriteSheetClip[2].h = 135;
-
-        gSpriteSheetClip[3].x = 411;
-        gSpriteSheetClip[3].y = 0;
-        gSpriteSheetClip[3].w = 137;
-        gSpriteSheetClip[3].h = 135;
-
-        gSpriteSheetClip[4].x = 548;
-        gSpriteSheetClip[4].y = 0;
-        gSpriteSheetClip[4].w = 137;
-        gSpriteSheetClip[4].h = 135;
-
-        gSpriteSheetClip[5].x = 685;
-        gSpriteSheetClip[5].y = 0;
-        gSpriteSheetClip[5].w = 137;
-        gSpriteSheetClip[5].h = 135;
     }
 
     return success;
@@ -205,7 +170,7 @@ bool media(){
 
 void close(){
 
-    gSpriteSheet.free();
+    gFlipArrow.free();
 
     SDL_DestroyRenderer(Renderer);
     Renderer = NULL;
@@ -233,12 +198,33 @@ int main(int argc, char* args[]){
 
             SDL_Event e;
 
-            int frame = 0;
+            double degrees = 0;
+
+            SDL_RendererFlip flipType = SDL_FLIP_NONE;
 
             while (!quit){
                 while (SDL_PollEvent(&e) != 0){
                     if (e.type == SDL_QUIT){
                         quit = true;
+                    }
+                    else if (e.type == SDL_KEYDOWN) {
+                        switch(e.key.keysym.sym){
+                            case SDLK_a:
+                                degrees -= 60;
+                                break;
+                            case SDLK_d:
+                                degrees += 60;
+                                break;
+                            case SDLK_q:
+                                flipType = SDL_FLIP_HORIZONTAL;
+                                break;
+                            case SDLK_w:
+                                flipType = SDL_FLIP_NONE;
+                                break;
+                            case SDLK_e:
+                                flipType = SDL_FLIP_VERTICAL;
+                                break;
+                        }
                     }
 
                 }
@@ -247,17 +233,9 @@ int main(int argc, char* args[]){
 				SDL_SetRenderDrawColor( Renderer, 0xFF, 0xFF, 0xFF, 0xFF );
 				SDL_RenderClear( Renderer );
 
-				SDL_Rect* CurrentClip = &gSpriteSheetClip[frame/6];
-
-				gSpriteSheet.render((SCREEN_WIDTH - CurrentClip->w)/2, (SCREEN_HEIGHT - CurrentClip->h)/2, CurrentClip);
+				gFlipArrow.render((SCREEN_WIDTH - gFlipArrow.getWidth())/2, (SCREEN_HEIGHT - gFlipArrow.getHeight())/2, NULL, degrees, NULL, flipType);
 
 				SDL_RenderPresent( Renderer );
-
-				frame++;
-
-				if (frame/6 > 6){
-                    frame = 0;
-				}
 
             }
         }

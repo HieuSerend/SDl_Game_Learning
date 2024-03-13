@@ -1,0 +1,8 @@
+#ignore folders
+**/obj
+**/bin
+#ignore files
+*.dll
+*.depend
+*.cbp
+*.layout
